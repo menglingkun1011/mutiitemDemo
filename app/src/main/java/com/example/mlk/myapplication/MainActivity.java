@@ -3,7 +3,9 @@ package com.example.mlk.myapplication;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,8 +15,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.mlk.myapplication.bean.ProductBean;
+import com.example.mlk.myapplication.view.MultiItemDivider;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +30,9 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private LinearLayoutManager linearLayoutManager;
     private MyAdapter adapter;
+    private Random random;
+    private int[] businessAar = {300500,300800};
+    private List<ProductBean> srcData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,13 +43,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        random = new Random();
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         linearLayoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
         recyclerView.setLayoutManager(linearLayoutManager);
+        //添加Android自带的分割线
+//        recyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.HORIZONTAL));
+        //添加自定义分割线
+        MultiItemDivider divider = new MultiItemDivider(this,DividerItemDecoration.VERTICAL,ContextCompat.getDrawable(this,R.drawable.custom_divider));
+        recyclerView.addItemDecoration(divider);
 
-        List<String> srcData = new ArrayList<>();
+        srcData = new ArrayList<>();
         for (int i = 0; i < 30; i++) {
-            srcData.add("数据-------------------------》"+i);
+            srcData.add(new ProductBean("产品-------------------------》"+i,random.nextInt(100)+"元",300500));
         }
         adapter = new MyAdapter(srcData,this);
         recyclerView.setAdapter(adapter);
@@ -57,6 +72,14 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.iv:
                         Toast.makeText(MainActivity.this,"iv",Toast.LENGTH_SHORT).show();
                         break;
+                    case R.id.tv:
+                        if(srcData.get(position).getBusinessCode() == 300500){
+                            Toast.makeText(MainActivity.this,"tv-->"+srcData.get(position).getBusinessCode(),Toast.LENGTH_SHORT).show();
+                        }else  if(srcData.get(position).getBusinessCode() == 300800){
+                            Toast.makeText(MainActivity.this,"tv-->"+srcData.get(position).getBusinessCode(),Toast.LENGTH_SHORT).show();
+                        }
+
+                        break;
                 }
             }
         });
@@ -64,10 +87,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static class MyAdapter extends RecyclerView.Adapter{
 
-        private List<String> data;
+        private List<ProductBean> data;
         private Context context;
 
-        public MyAdapter(List<String> data, Context context) {
+        public MyAdapter(List<ProductBean> data, Context context) {
             this.data = data;
             this.context = context;
         }
@@ -102,18 +125,20 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            String s = data.get(position);
+            ProductBean productBean = data.get(position);
 
             if(holder instanceof TextViewHolder){
-                ((TextViewHolder)holder).fillData(s);
+                productBean.setBusinessCode(300500);
+                ((TextViewHolder)holder).fillData(productBean);
             }else if(holder instanceof PicViewHolder){
-                ((PicViewHolder)holder).fillData(s);
+                productBean.setBusinessCode(300800);
+                ((PicViewHolder)holder).fillData(productBean);
             }
         }
 
         @Override
         public int getItemViewType(int position) {
-            if(data.get(position).contains("2")){
+            if(data.get(position).getName().contains("2")){
                 return ITEM_PIC_TYPE;
             }
             return ITEM_TEXT_TYPE;
@@ -132,10 +157,11 @@ public class MainActivity extends AppCompatActivity {
                 super(itemView);
                 tv = itemView.findViewById(R.id.tv);
                 itemView.setOnClickListener(this);
+                tv.setOnClickListener(this);
             }
 
-            public void fillData(String s){
-                tv.setText(s);
+            public void fillData(ProductBean productBean){
+                tv.setText(productBean.getName());
             }
 
             @Override
@@ -158,10 +184,11 @@ public class MainActivity extends AppCompatActivity {
                 iv = itemView.findViewById(R.id.iv);
                 itemView.setOnClickListener(this);
                 iv.setOnClickListener(this);
+                tv.setOnClickListener(this);
             }
 
-            public void fillData(String s){
-                tv.setText(s);
+            public void fillData(ProductBean productBean){
+                tv.setText(productBean.getName());
             }
 
             @Override
