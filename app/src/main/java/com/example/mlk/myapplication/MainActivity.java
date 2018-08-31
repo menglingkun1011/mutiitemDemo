@@ -9,7 +9,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +44,22 @@ public class MainActivity extends AppCompatActivity {
         }
         adapter = new MyAdapter(srcData,this);
         recyclerView.setAdapter(adapter);
+        adapter.setClickListener(new MyAdapter.OnItemClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                switch (view.getId()){
+                    case R.id.ll_pic_layout:
+                        Toast.makeText(MainActivity.this,"图文",Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.ll_text_layout:
+                        Toast.makeText(MainActivity.this,"文本",Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.iv:
+                        Toast.makeText(MainActivity.this,"iv",Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        });
     }
 
     private static class MyAdapter extends RecyclerView.Adapter{
@@ -52,6 +70,16 @@ public class MainActivity extends AppCompatActivity {
         public MyAdapter(List<String> data, Context context) {
             this.data = data;
             this.context = context;
+        }
+
+        private OnItemClickListener clickListener;
+
+        public void setClickListener(OnItemClickListener clickListener) {
+            this.clickListener = clickListener;
+        }
+
+        public interface OnItemClickListener {
+            void onClick(View view, int position);
         }
 
         @NonNull
@@ -96,32 +124,51 @@ public class MainActivity extends AppCompatActivity {
             return data.size();
         }
 
-        class TextViewHolder extends RecyclerView.ViewHolder{
+        class TextViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
             public TextView tv;
 
             public TextViewHolder(View itemView) {
                 super(itemView);
                 tv = itemView.findViewById(R.id.tv);
+                itemView.setOnClickListener(this);
             }
 
             public void fillData(String s){
                 tv.setText(s);
+            }
+
+            @Override
+            public void onClick(View v) {
+                if(clickListener != null){
+                    clickListener.onClick(v,getAdapterPosition());
+                }
             }
         }
 
 
-        class PicViewHolder extends RecyclerView.ViewHolder{
+        class PicViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
             public TextView tv;
+            public ImageView iv;
 
             public PicViewHolder(View itemView) {
                 super(itemView);
                 tv = itemView.findViewById(R.id.tv);
+                iv = itemView.findViewById(R.id.iv);
+                itemView.setOnClickListener(this);
+                iv.setOnClickListener(this);
             }
 
             public void fillData(String s){
                 tv.setText(s);
+            }
+
+            @Override
+            public void onClick(View v) {
+                if(clickListener != null){
+                    clickListener.onClick(v,getAdapterPosition());
+                }
             }
         }
     }
